@@ -10,8 +10,30 @@ def load_teams_data():
     td = pd.read_csv("./team_info.csv")
     return td
 
+def load_game_data():
+    gd = pd.read_csv("./game.csv")
+    return gd
+
+def load_game_goalie_stats():
+    gs = pd.read_csv("./game_goalie_stats")
+    return gs
+
+def load_game_skater_stats():
+    ss = pd.read_csv("./game_skater_stats.csv")
+    return ss
+
+def load_game_teams_stats():
+    ts = pd.read_csv("./game_teams_stats.csv")
+    return ts
+
+
+
 #global variables
 team_data = load_teams_data()
+game_data = load_game_data()
+game_teams_stats = load_game_teams_stats()
+game_goalie_stats = load_game_goalie_stats()
+game_skater_stats = load_game_skater_stats()
 print("successfully loaded teams data")
 
 
