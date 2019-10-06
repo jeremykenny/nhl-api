@@ -7,17 +7,24 @@ As a casual fan, I want to see the scores of recent NHL games so I can see who w
 # acceptance criteria
 Ability to specify date to provide game results summaries for.
 For each game, provide:
+    - Hyperlink to corresponding Game Result Details resource
+    - Hyperlink to corresponding Game Player Stats resource
     - How game ended (normal, overtime, etc)
-    - For each team, abbreviation of team name and number of goals scored.
+    - For each team:
+        - Hyperlink to team resource
+        - abbreviation of team name 
+        - number of goals scored.
     
 # resource requirement
-Game Result Details
+Game Results Details
 # user story
 As a stats junkie, I want detailed performance information for each team in a game so I can predict the winners of future games.
 # acceptance criteria
 Ability to specify game to provide result details for.
+Provide hyperlink to Game Player Stats resource
 For each team in the specified game, provide:
     - team name
+    - Hyperlink to team resource
     - number of goals
     - number of shots
     - number of hits
@@ -41,15 +48,27 @@ For each player in a game, provide:
     - goals
     - assists
     - shots
-    - hits
-    - power play goals
-    - power play assists
-    - penalty minutes
-    - face-off wins
-    - face-off taken
-    - takeaways
-    - giveaways
-    - short handed goals
-    - short handed assist
-    - plus/minus
-    - even time on ice
+    If not a goalie:
+        - hits
+        - power play goals
+        - power play assists
+        - penalty minutes
+        - face-off wins
+        - face-off taken
+        - takeaways
+        - giveaways
+        - short handed goals
+        - short handed assist
+        - blocked
+        - plus/minus
+        - short handed time on ice
+        - even time on ice
+    If a goalie:
+        - saves
+        - power play saves
+        - short handed saves
+        - even shots against
+        - power play shots against
+        - save percentage
+        - power play save percentage
+        - even strength save percentage
