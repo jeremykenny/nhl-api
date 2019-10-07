@@ -100,7 +100,7 @@ def get_game_summaries():
 
 
     games = games.drop(["season", "type", "date_time", "date_time_GMT", \
-    "home_rink_side_start", "venue", "venue_link", "venue_time_zone_id", "venue_time_zone_tz"], axis=1)
+    "home_rink_side_start", "venue", "venue_link", "venue_time_zone_id", "venue_time_zone_tz", "venue_time_zone_offset"], axis=1)
     #exception can occur here if an entry in game.csv references a nonexistent team id
     try:
         games = games.assign(home_team=lambda g:get_team_summaries(g['home_team_id']))
