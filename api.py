@@ -66,6 +66,9 @@ def get_team_summaries(ids):
 def make_hyperlink(ids, str1, str2):
     return [str1 + str(game_id) + str2 for game_id in ids.values]
 
+def format_outcomes(outcome):
+    return "FINAL/OT" if "OT" in outcome else "FINAL"
+
 @app.route('/')
 def index():
     return "NHL API"
@@ -115,6 +118,8 @@ def get_game_summaries():
     except Exception:
         abort(500)
     games = games.drop(["home_team_id", "away_team_id"], axis=1)
+    # Change format of outcomes
+    games['outcome'] = games['outcome'].map(format_outcomes)
     # URLs
     games = games.assign(team_stats=lambda g:make_hyperlink(g['game_id'], "/api/results/", "/teams"))
     games = games.assign(player_stats=lambda g:make_hyperlink(g['game_id'], "/api/results/", "/players"))
