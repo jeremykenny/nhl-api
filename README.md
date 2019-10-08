@@ -48,21 +48,20 @@ For each player in a game, provide:
     - goals
     - assists
     - shots
-    If not a goalie:
-        - hits
-        - power play goals
-        - power play assists
-        - penalty minutes
-        - face-off wins
-        - face-off taken
-        - takeaways
-        - giveaways
-        - short handed goals
-        - short handed assist
-        - blocked
-        - plus/minus
-        - short handed time on ice
-        - even time on ice
+    - hits
+    - power play goals
+    - power play assists
+    - penalty minutes
+    - face-off wins
+    - face-off taken
+    - takeaways
+    - giveaways
+    - short handed goals
+    - short handed assist
+    - blocked
+    - plus/minus
+    - short handed time on ice
+    - even time on ice
     If a goalie:
         - saves
         - power play saves
@@ -72,3 +71,7 @@ For each player in a game, provide:
         - save percentage
         - power play save percentage
         - even strength save percentage
+
+# testing URLs
+/api/results?date=2012-04-15
+/api/results/2011030221/teams
