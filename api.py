@@ -27,6 +27,10 @@ def load_game_teams_stats():
     ts = pd.read_csv("./game_teams_stats.csv")
     return ts
 
+def load_player_data():
+    pld = pd.read_csv("./player_info.csv")
+    return pld
+
 
 
 #global variables
@@ -35,7 +39,8 @@ game_data = load_game_data()
 game_teams_stats = load_game_teams_stats()
 game_goalie_stats = load_game_goalie_stats()
 game_skater_stats = load_game_skater_stats()
-print("successfully loaded teams data")
+player_data = load_player_data()
+#print("successfully loaded teams data")
 
 def team_summary(team_id):
     '''
@@ -43,7 +48,8 @@ def team_summary(team_id):
     Summary includes abbreviation, name, and URL.
     Error handling deferred to caller.
 
-    Args: integer ID of the team
+    Args: 
+    team_id: string ID of the team
     '''
     teams = team_data[team_data["team_id"] == int(team_id)]
     team = teams.iloc[0]
@@ -145,23 +151,59 @@ def get_game_teams_details(game_id):
     away = away.rename({"powerPlayOpportunities": "power play opportunities","powerPlayGoals": "power play goals","faceOffWinPercentage": "face-off win percentage"})
     results["home team results"] = home.to_dict()
     results["away team results"] = away.to_dict()
-    # Pandas stores numeric entries as numpy types.
+    # Something above causes Pandas to convert numeric entries to numpy types.
+    # Flask cannot jsonify numpy types, so we need to convert numeric values to python native types
     for key, dictionary in results.items():
         if (isinstance(dictionary, dict)):
             for key2, val in dictionary.items():
                 if isinstance(val, np.generic):
                     # convert to python native type
                     results[key][key2] = val.item()
-                # This json structure is only two levels deep; a more general solution should use a recursive function.
+                # This json structure is only two levels deep, so this is good enough.
+                # A more general solution should use a recursive function.
     results["player stats"] = "/api/results/" + game_id + "/players"
 
     return jsonify(results)
 
-'''
+
 # Game Player Stats
 @app.route('/api/results/<string:game_id>/players')
 def get_game_players_details(game_id):
-'''
+    # fetch sub dataframe for all games where game_id=game_id
+    games = game_skater_stats[game_skater_stats["game_id"] == int(game_id)]
+
+    #return 404 if there isn't one game
+    if games.shape[0] < 1:
+        abort(404)
+
+    # games should have one entry for each player in the game, except for goalies
+    game_player_stats = games.merge(player_data, on="player_id")
+    game_player_stats = game_player_stats.assign(full_name=lambda gps: gps['firstName'] +" " + gps['lastName'])
+    game_player_stats.set_index("full_name", inplace=True)
+    game_player_stats = game_player_stats.assign(team=lambda g:get_team_summaries(g['team_id']))
+    game_player_stats = game_player_stats.assign(URL=lambda g:make_hyperlink(g['player_id'], "/api/players/", ""))
+    game_player_stats = game_player_stats.drop(["team_id", "firstName", "lastName", "game_id","player_id","nationality","birthCity","primaryPosition","birthDate","link"], axis=1)
+
+    # as above, this time for goalies
+    games_goalies = game_goalie_stats[game_goalie_stats["game_id"] == int(game_id)]
+    if games_goalies.shape[0] < 1:
+        abort(404)
+
+    goalie_stats = games_goalies.merge(player_data, on="player_id")
+    goalie_stats = goalie_stats.assign(full_name=lambda gs: gs['firstName'] +" " + gs['lastName'])
+    goalie_stats.set_index("full_name", inplace=True)
+    goalie_stats = goalie_stats.assign(team=lambda g:get_team_summaries(g['team_id']))
+    goalie_stats = goalie_stats.assign(URL=lambda g:make_hyperlink(g['player_id'], "/api/players/", ""))
+    goalie_stats = goalie_stats.drop(["team_id", "decision", "firstName", "lastName", "game_id","player_id","nationality","birthCity","primaryPosition","birthDate","link"], axis=1)
+
+    skater_dict = game_player_stats.to_dict(orient="index")
+    goalie_dict = goalie_stats.to_dict(orient="index")
+
+
+    statsJSON = {   "skaters": skater_dict,
+                    "goalies": goalie_dict}
+    return jsonify(statsJSON)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
