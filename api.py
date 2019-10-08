@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, abort, request
 import pandas as pd
+import numpy as np
 
 app = Flask(__name__)
 
@@ -112,17 +113,51 @@ def get_game_summaries():
     games = games.assign(team_stats=lambda g:make_hyperlink(g['game_id'], "/api/results/", "/teams"))
     games = games.assign(player_stats=lambda g:make_hyperlink(g['game_id'], "/api/results/", "/players"))
     games.set_index("game_id", inplace=True)
-    # Change team id columns to API hyperlinks
     games.rename(columns={"team_stats": "team stats", "player_stats": "player stats", "home_team": "home team", "away_team": "away team"})
     return jsonify(games.to_dict(orient="index"))
     
     
 
-'''
+
 # Game Results Details
 @app.route('/api/results/<string:game_id>/teams')
 def get_game_teams_details(game_id):
-    
+    # fetch sub dataframe for all games (hopefully 2) where game_id=game_id
+    games = game_teams_stats[game_teams_stats["game_id"] == int(game_id)]
+
+    #return 404 if there isn't one game
+    if games.shape[0] < 1:
+        abort(404)
+    # return 500 if there are more than two games
+    if games.shape[0] > 2:
+        abort(500)
+
+    # get games
+    game1 = games.iloc[0]
+    game2 = games.iloc[1]
+    home = game1 if game1.HoA == "home" else game2
+    away = game2 if game2.HoA == "away" else game1
+    results = { "home team": team_summary(home['team_id']),
+                "away team": team_summary(away['team_id'])}
+    home = home.drop(["game_id","team_id","HoA","won","settled_in","head_coach"])
+    away = away.drop(["game_id","team_id","HoA","won","settled_in","head_coach"])
+    home = home.rename({"powerPlayOpportunities": "power play opportunities","powerPlayGoals": "power play goals","faceOffWinPercentage": "face-off win percentage"})
+    away = away.rename({"powerPlayOpportunities": "power play opportunities","powerPlayGoals": "power play goals","faceOffWinPercentage": "face-off win percentage"})
+    results["home team results"] = home.to_dict()
+    results["away team results"] = away.to_dict()
+    # Pandas stores numeric entries as numpy types.
+    for key, dictionary in results.items():
+        if (isinstance(dictionary, dict)):
+            for key2, val in dictionary.items():
+                if isinstance(val, np.generic):
+                    # convert to python native type
+                    results[key][key2] = val.item()
+                # This json structure is only two levels deep; a more general solution should use a recursive function.
+    results["player stats"] = "/api/results/" + game_id + "/players"
+
+    return jsonify(results)
+
+'''
 # Game Player Stats
 @app.route('/api/results/<string:game_id>/players')
 def get_game_players_details(game_id):
