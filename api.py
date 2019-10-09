@@ -53,8 +53,8 @@ def team_summary(team_id):
     '''
     teams = team_data[team_data["team_id"] == int(team_id)]
     team = teams.iloc[0]
-    team = team.drop(["team_id","franchiseId","shortName","link"])
-    team = team.rename(index={"teamName": "team name"})
+    team = team.drop(["team_id","franchiseId","link"])
+    team = team.rename(index={"teamName": "team name", "shortName" : "city"})
     
     teamJSON = team.to_dict()
     teamJSON["URL"] = "/api/teams/" + team["abbreviation"]
