@@ -156,9 +156,23 @@ The structure of the team object is the same as in the other two resources:
 Design rationale:
     I placed goalies in a separate group from non-goalies because goalies have stats that non-goalies do not (e.g. saves). This means their JSON objects have extra elements not found in those of normal skaters. Separating players into these categories lets developers accessing this resource be sure that all players within a category have the same JSON structure.
 
-    I could have grouped players according to their teams, but chose not to based on the user story I wrote. Fantasy hockey players are interested in the performance of the players on their fantasy teams. . This decision resulted in some redundancy, as the team information summary is provided once for every player on a team.
+    I could have grouped players according to their teams, but chose not to based on the user story I wrote. Fantasy hockey players are interested in the performance of the players on their fantasy teams. The performances of specific players are of interest to this user, while the teams the players belong to is of lesser importance. Likewise, the performance of the team as a whole is generally not of interest to fantasy hockey players, which is why this resource does not provide a link to the Game Results Details resource. This decision resulted in some redundancy, as the team information summary is provided once for every player on a team. It also means developers who do want to list players according to their teams have to do so themselves.
 
 # testing URLs
+Working Game Results Summary URL with single result:
+/api/results?date=2013-05-21
+
+Working Game Results Summary URL with multiple results:
 /api/results?date=2012-04-15
+
+Game Results Summary URL with no results: 
+/api/results?date=2030-05-10
+
+Working Game Results Details URLs:
 /api/results/2011030221/teams
+/api/results/2012030235/teams
+
+Working Game Player Stats URLs
 /api/results/2011030221/players
+/api/results/2012030235/players
+
