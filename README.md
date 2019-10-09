@@ -16,11 +16,12 @@ For each game, provide:
         - number of goals scored.
 # resource description
 URL = /api/results?date={YYY-MM-DD} (e.g. /api/results?date=2012-04-15)
-This resource provides summaries for all games that occured on the specified date. Game objects are labelled by their NHL-provided id. Each game object contains the following elements:
+This resource provides summaries for all games that occured on the specified date. 
+The resource includes one game object for each game that occurred on that date. Game objects are labelled by their NHL-provided id. Each game object contains the following elements:
     away_goals: Number of goals scored by the away team.
-    away_team: Object representing the away team.
+    away_team: Object containing information about the away team.
     home_goals: Number of goals scored by the home team.
-    home_team: Object representing the home team.
+    home_team: Object containing information about the home team.
     outcome: "FINAL" if the game ended normally or "FINAL/OT" if the game ended in overtime.
     player_stats: A hyperlink to the Game Player Stats resource for this game.
     team_stats: A hyperlink to the Game Results Details resource for this game.
@@ -31,7 +32,7 @@ The away_team and home_team objects each contain the following elements:
     city: The team's home city
 
 Design rationale:
-    My rationale for labelling the games by their NHL-provided id was to ensure that every game returned by a single request had a unique identifier. I considered labelling the games according to the teams (e.g. "Devils vs. Panthers") for a more human-readable name, but I this would have left the possibility that two games could have the same name (e.g. if the Devils played against the Panthers twice in one day.)
+    My rationale for labelling the games by their NHL-provided id was to ensure that every game returned by a single request had a unique identifier. I considered labelling the games according to the teams for a more human-readable name (e.g. "Devils vs. Panthers"), but this would have left the possibility that two games could have the same name (e.g. if the Devils played against the Panthers twice in one day.)
 
     The home_team and away_team objects:
         I wanted the team information to act as a summary of the team's permanent profile. I felt that it should stay the same from game to game, so I kept the number of goals scored by a team separate as a separate object.
@@ -44,8 +45,6 @@ Design rationale:
     
     While most users would probably visit the Game Results Details before the Game Player Stats, I include the Player Stats URL here because it is a sister to the Game Results Details resource in the URL structure. This does not incur significant overhead as the function can construct the URL without joining additional tables.
     
-
-
 
 # resource requirement
 Game Results Details
@@ -67,7 +66,43 @@ For each team in the specified game, provide:
     - number of giveaways
     - number of takeaways
 # resource decsription
+URL = /api/results/{ID}/teams (e.g. /api/results/2011030221/teams)
+This resource provides performance information for each team involved in a game.
+The resource includes the following objects:
+    away team: Object containing information about the away team.
+    home team: Object containing information about the home team.
+    player stats: A hyperlink to the Game Player Stats resource for this game.
+The away team and home team objects each contain the following elements:
+    team information: Basic information about the team. Contains:
+        URL: A hyperlink to a hypothetical api resource for the team
+        abbreviation: The three letter abbreviation of the team's name
+        team name: The name of the team
+        city: The team's home city
+    team game results: Performance stats for this team in this game.
+The team game results object contains the following elements:
+    "face-off win percentage"
+    "giveaways"
+    "goals"
+    "head_coach"
+    "hits"
+    "pim"
+    "power play goals"
+    "power play opportunities"
+    "shots"
+    "takeaways"
 
+Design rationale:
+    Because this resource provides more data per team than the Game Results Summary, I chose a more organized JSON structure for this part. I decided to nest all information pertaining to the home team in one object, and all information pertaining to the away team in another object. As before, I kept the teams' basic identifying information in a separate object from information pertaining to the teams' performance in particular games.
+
+    This resource provides the same team information as is provided by the Game Results Summary. The team name and city are sufficient to identify a team, and users looking for additional information can follow the hyperlink to the team's profile page. The team's abbreviation does not strictly need to be included but does not cost additional overhead and is convenient for designers who may want to display it in their applications.
+
+    The team game results objects contain almost all the data provided in game_team_stats.csv for each team in this game. They do not include:
+        team_id or game_id: Not included because the user doesn't need to know them.
+        HoA (home or away): Not included because it is already provided by the structure of the JSON object.
+        settled_in: Not included as this information does not pertain to a specific team but to the game as a whole.
+    I provided the remaining stats as they are all things a user might be interested in. I chose not to compute any additional stats for the sake of time and because I think the provided information is detailed enough for most people's purposes.
+
+    Finally, I included a hyperlink to the Game Player Stats resource associated with this game. The purpose of this resource is to provide details about games, so devlopers accessing this resource may also want the additional details provided by the Game Player Stats resource. Providing a hyperlink here helps them explore the API and find data relevant to their purposes.
 
 # resource requirement
 Game Player Stats
