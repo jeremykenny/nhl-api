@@ -148,14 +148,14 @@ def get_game_teams_details(game_id):
     game2 = games.iloc[1]
     home = game1 if game1.HoA == "home" else game2
     away = game2 if game2.HoA == "away" else game1
-    results = { "home team": team_summary(home['team_id']),
+    teams = { "home team": team_summary(home['team_id']),
                 "away team": team_summary(away['team_id'])}
-    home = home.drop(["game_id","team_id","HoA","won","settled_in","head_coach"])
-    away = away.drop(["game_id","team_id","HoA","won","settled_in","head_coach"])
+    home = home.drop(["game_id","team_id","HoA","won","settled_in"])
+    away = away.drop(["game_id","team_id","HoA","won","settled_in"])
     home = home.rename({"powerPlayOpportunities": "power play opportunities","powerPlayGoals": "power play goals","faceOffWinPercentage": "face-off win percentage"})
     away = away.rename({"powerPlayOpportunities": "power play opportunities","powerPlayGoals": "power play goals","faceOffWinPercentage": "face-off win percentage"})
-    results["home team results"] = home.to_dict()
-    results["away team results"] = away.to_dict()
+    results = { "home team results": home.to_dict(), 
+                "away team results": away.to_dict() }
     # Something above causes Pandas to convert numeric entries to numpy types.
     # Flask cannot jsonify numpy types, so we need to convert numeric values to python native types
     for key, dictionary in results.items():
@@ -166,9 +166,14 @@ def get_game_teams_details(game_id):
                     results[key][key2] = val.item()
                 # This json structure is only two levels deep, so this is good enough.
                 # A more general solution should use a recursive function.
-    results["player stats"] = "/api/results/" + game_id + "/players"
+    home_details = {"team information": teams["home team"],
+                    "team game results": results["home team results"]}
+    away_details = {"team information": teams["away team"],
+                    "team game results": results["away team results"]}
+    detailsJSON = {"home team": home_details, "away team": away_details,
+                   "player stats": "/api/results/" + game_id + "/players"}
 
-    return jsonify(results)
+    return jsonify(detailsJSON)
 
 
 # Game Player Stats
