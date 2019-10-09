@@ -141,6 +141,22 @@ For each player in a game, provide:
         - power play save percentage
         - even strength save percentage
 # resource description
+/api/results/{ID}/players (e.g. /api/results/2011030221/players)
+This resource provides details about the performance of individual players in a game.
+This resource includes a JSON object for each player in a game. Players are grouped into two categories, goalies and skaters (all non-goalies are considered skaters). Players are labelled by their names. Each player object contains:
+    URL: a link to a hypothetical resource which could provide a profile of the player
+    team: object containing information about the player's team.
+    the player's stats for this game
+The structure of the team object is the same as in the other two resources:
+    URL: A link to a hypothetical api resource for the team
+    abbreviation: The three letter abbreviation of the team's name
+    team name: The name of the team
+    city: The team's home city
+
+Design rationale:
+    I placed goalies in a separate group from non-goalies because goalies have stats that non-goalies do not (e.g. saves). This means their JSON objects have extra elements not found in those of normal skaters. Separating players into these categories lets developers accessing this resource be sure that all players within a category have the same JSON structure.
+
+    I could have grouped players according to their teams, but chose not to based on the user story I wrote. Fantasy hockey players are interested in the performance of the players on their fantasy teams. . This decision resulted in some redundancy, as the team information summary is provided once for every player on a team.
 
 # testing URLs
 /api/results?date=2012-04-15
