@@ -1,5 +1,5 @@
 # Assignment1
-
+The data files used by this project can be obtained from https://www.kaggle.com/martinellis/nhl-game-data. Place the csv files in the root directory of this repository.
 # resource requirement
 Game Results Summary
 # user story
